@@ -77,12 +77,23 @@ const KEY_SIGNATURES = {
   Eb: ["Bb","Eb","Ab"],
 };
 
-// Staff-line/space y-position (matching the fixed 5-line staff drawn at y 50-90)
-// for each natural letter name, per clef — used to place key-signature accidentals.
-const ACCIDENTAL_Y = {
-  Treble: { F:50, C:65, G:45, D:60, A:75, E:55, B:70 },
-  Bass:   { F:60, C:75, G:55, D:70, A:85, E:65, B:80 },
-};
+// Y-position for a key-signature accidental, derived from the SAME chromatic
+// mapping used for actual notes (STAFF_Y) — not real staff-notation spacing,
+// which this simplified renderer doesn't use. This keeps the accidental's
+// height consistent with where a real note of that letter would be drawn.
+const LETTER_PC = { C:0, D:2, E:4, F:5, G:7, A:9, B:11 };
+function accidentalMidi(letter, range){
+  const pc = LETTER_PC[letter];
+  const mid = (range[0] + range[1]) / 2;
+  let best = null, bestDist = Infinity;
+  for(let m = range[0]-12; m <= range[1]+12; m++){
+    if(((m % 12) + 12) % 12 === pc){
+      const d = Math.abs(m - mid);
+      if(d < bestDist){ bestDist = d; best = m; }
+    }
+  }
+  return best;
+}
 
 const DIFFICULTY_PRESETS = {
   Beginner: { noteValues:["Quarter"], bpm:60, beatsPerBar:4 },
@@ -264,7 +275,7 @@ function App(){
 
         {KEY_SIGNATURES[keyRoot] && KEY_SIGNATURES[keyRoot].map((acc,i)=>{
           const letter = acc.charAt(0);
-          const y = ACCIDENTAL_Y[clef==="Grand"?"Treble":clef][letter] * STAFF_SCALE;
+          const y = STAFF_Y(accidentalMidi(letter, CLEFS[clef==="Grand"?"Treble":clef].range));
           return (
             <text key={i} x={58+i*13} y={y} fontSize={20*STAFF_SCALE} textAnchor="middle" dominantBaseline="middle" fill="black">
               {acc.includes("#")?"♯":"♭"}
@@ -280,7 +291,7 @@ function App(){
         }
         {clef==="Grand" && KEY_SIGNATURES[keyRoot] && KEY_SIGNATURES[keyRoot].map((acc,i)=>{
           const letter = acc.charAt(0);
-          const y = ACCIDENTAL_Y.Bass[letter] * STAFF_SCALE + STAFF2_OFFSET;
+          const y = STAFF_Y(accidentalMidi(letter, CLEFS.Bass.range)) + STAFF2_OFFSET;
           return (
             <text key={"bk"+i} x={54+i*13} y={y} fontSize={20*STAFF_SCALE} textAnchor="middle" dominantBaseline="middle" fill="black">
               {acc.includes("#")?"♯":"♭"}
