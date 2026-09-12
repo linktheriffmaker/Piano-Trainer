@@ -277,7 +277,7 @@ function App(){
           const letter = acc.charAt(0);
           const y = STAFF_Y(accidentalMidi(letter, CLEFS[clef==="Grand"?"Treble":clef].range));
           return (
-            <text key={i} x={58+i*13} y={y} fontSize={20*STAFF_SCALE} textAnchor="middle" dominantBaseline="middle" fill="black">
+            <text key={i} x={54+i*16} y={y} fontSize={20*STAFF_SCALE} textAnchor="middle" dominantBaseline="middle" fill="black">
               {acc.includes("#")?"♯":"♭"}
             </text>
           );
@@ -293,7 +293,7 @@ function App(){
           const letter = acc.charAt(0);
           const y = STAFF_Y(accidentalMidi(letter, CLEFS.Bass.range)) + STAFF2_OFFSET;
           return (
-            <text key={"bk"+i} x={54+i*13} y={y} fontSize={20*STAFF_SCALE} textAnchor="middle" dominantBaseline="middle" fill="black">
+            <text key={"bk"+i} x={50+i*16} y={y} fontSize={20*STAFF_SCALE} textAnchor="middle" dominantBaseline="middle" fill="black">
               {acc.includes("#")?"♯":"♭"}
             </text>
           );
