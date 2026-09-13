@@ -253,6 +253,21 @@ function parseChordSymbol(rawName){
   }
   return { root: root, intervals: q.i, degrees: q.d, bass: bass };
 }
+var DEGREE_NUM = {0:'I',1:'bII',2:'II',3:'bIII',4:'III',5:'IV',6:'bV',7:'V',8:'bVI',9:'VI',10:'bVII',11:'VII'};
+function romanNumeral(rawName){
+  var sym = rawName.replace(/\s*\([^)]*\)\s*/g,'').trim();
+  if(sym.indexOf('/') !== -1) sym = sym.split('/')[0];
+  var m = sym.match(/^([A-G])(#|b)?(.*)$/);
+  if(!m) return '';
+  var root = NOTE_TO_PC[m[1] + (m[2]||'')];
+  var suffix = m[3] || '';
+  var base = DEGREE_NUM[root];
+  if(suffix === 'dim' || suffix === 'dim7') return base.toLowerCase() + '°';
+  if(suffix === 'm7b5') return base.toLowerCase() + 'ø';
+  if(/^m(?!aj)/.test(suffix)) return base.toLowerCase();
+  if(suffix === 'aug' || suffix.indexOf('+') !== -1) return base + '+';
+  return base;
+}
 function computeVoicing(rawName){
   var ch = parseChordSymbol(rawName);
   var notes = [], prev = -1;
@@ -435,7 +450,11 @@ function render(){
   chords.forEach(function(chd){
     var card = el('div','card');
     var top = el('div','card-top');
-    top.appendChild(el('div','card-name', displayChordName(chd)));
+    var nameWrap = el('div','card-name-wrap');
+    nameWrap.appendChild(el('div','card-name', displayChordName(chd)));
+    var rn = romanNumeral(chd.name);
+    if(rn) nameWrap.appendChild(el('div','card-roman', rn));
+    top.appendChild(nameWrap);
     var playBtn = el('button','play-btn','\u25b6');
     playBtn.onclick = function(e){ e.stopPropagation(); playPianoChord(chd.name); };
     top.appendChild(playBtn);
@@ -472,7 +491,11 @@ function render(){
   invChords.forEach(function(chd){
     var card = el('div','card');
     var top = el('div','card-top');
-    top.appendChild(el('div','card-name', displayChordName(chd)));
+    var nameWrap = el('div','card-name-wrap');
+    nameWrap.appendChild(el('div','card-name', displayChordName(chd)));
+    var rn = romanNumeral(chd.name);
+    if(rn) nameWrap.appendChild(el('div','card-roman', rn));
+    top.appendChild(nameWrap);
     var playBtn = el('button','play-btn','\u25b6');
     playBtn.onclick = function(e){ e.stopPropagation(); playPianoChord(chd.name); };
     top.appendChild(playBtn);
@@ -498,7 +521,11 @@ function render(){
     JAZZ_FUSION.forEach(function(chd){
       var card = el('div','card');
       var top = el('div','card-top');
-      top.appendChild(el('div','card-name', displayChordName(chd)));
+      var nameWrap = el('div','card-name-wrap');
+    nameWrap.appendChild(el('div','card-name', displayChordName(chd)));
+    var rn = romanNumeral(chd.name);
+    if(rn) nameWrap.appendChild(el('div','card-roman', rn));
+    top.appendChild(nameWrap);
       var playBtn = el('button','play-btn','\u25b6');
       playBtn.onclick = function(e){ e.stopPropagation(); playPianoChord(chd.name); };
       top.appendChild(playBtn);
@@ -646,6 +673,9 @@ body.mode-bigbeat{ --bg: var(--bigbeat-bg); --surface: var(--bigbeat-surface); -
 .card:active{ transform: scale(0.97); }
 .card-top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
 .card-name{ font-family:'Fraunces', serif; font-weight:600; font-size:15.5px; line-height:1.25; word-break:break-word; padding-right:6px; }
+.card-name-wrap{ display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; padding-right:6px; }
+.card-name-wrap .card-name{ padding-right:0; }
+.card-roman{ font-family:'Space Mono', monospace; font-size:11px; font-weight:700; color: var(--accent); border:1px solid var(--accent); border-radius:20px; padding:1px 7px; line-height:1.5; flex-shrink:0; }
 .play-btn{ width: 30px; height:30px; border-radius:50%; border:none; background: var(--accent); color: var(--bg); font-size: 12px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
 .card-note{ font-size: 11.5px; line-height:1.4; color: var(--muted); margin-top:6px; min-height: 44px; }
 
